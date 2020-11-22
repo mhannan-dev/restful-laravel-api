@@ -13,7 +13,14 @@ class ContactController extends Controller
      */
     public function index()
     {
-        return view('welcome');
+      $data = [
+        'title'  => 'All contacts',
+        'cteate'   => 'Create',
+      ];
+      $data ['contacts'] = Contact::all();
+      //dd($data['contacts']);
+
+        return view('contacts.index',$data);
     }
 
     /**
@@ -22,8 +29,12 @@ class ContactController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
+
     {
-      return view('create');
+      $data = [
+        'cteate'   => 'Add contact',
+      ];
+      return view('contacts.create', $data);
     }
 
     /**
@@ -34,22 +45,25 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
+      //dd($request);
       $request->validate([
-          'first_name'=>'required',
-          'last_name'=>'required',
-          'email'=>'required'
+          'name'=>'required',
+          'email'=>'required',
+          'job_title' =>'required',
+          'city'=>'required',
+          'country'=>'required',
       ]);
 
-      $contact = new Contact([
-          'first_name' => $request->get('first_name'),
-          'last_name' => $request->get('last_name'),
-          'email' => $request->get('email'),
-          'job_title' => $request->get('job_title'),
-          'city' => $request->get('city'),
-          'country' => $request->get('country')
-      ]);
-      $contact->save();
-      return redirect('/')->with('success', 'Contact saved!');
+        $contact = new Contact([
+            'name' => $request->get('name'),
+            'email' => $request->get('email'),
+            'job_title' => $request->get('job_title'),
+            'city' => $request->get('city'),
+            'country' => $request->get('country')
+        ]);
+        $contact->save();
+
+      return redirect('/index')->with('success', 'Contact saved!');
     }
 
     /**
@@ -70,8 +84,14 @@ class ContactController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
+
     {
-        //
+
+        $data = [
+            'edit'   => 'Edit contact',
+        ];
+        $data['contact'] = Contact::find($id);
+        return view('contacts.edit', $data);
     }
 
     /**
@@ -83,7 +103,20 @@ class ContactController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name'=>'required',
+            'email'=>'required'
+        ]);
+
+        $contact = Contact::find($id);
+        $contact->name =  $request->get('name');
+        $contact->email = $request->get('email');
+        $contact->job_title = $request->get('job_title');
+        $contact->city = $request->get('city');
+        $contact->country = $request->get('country');
+        $contact->save();
+
+        return redirect('/index')->with('success', 'Contact updated!');
     }
 
     /**
@@ -92,8 +125,14 @@ class ContactController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
-        //
+        $delete_row = Contact::find($id);
+        //dd($delete_row);
+        if (!is_null($delete_row)) {
+            $delete_row->delete();
+        }
+        
+        return back();
     }
 }
